@@ -6,7 +6,7 @@ tmp/
 .DS_Store
 *.pkl
 tags
-
+sklearn-env/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
