@@ -10,7 +10,7 @@ All four datasets used in this paper can be downloaded [here](https://drive.goog
 conda create -n <environment_name> python=3.9
 conda activate <environment_name>
 ```
-##Install dependencies
+## Install dependencies
 ```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 pip install scipy
