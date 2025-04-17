@@ -44,7 +44,7 @@ class ActorCritic(nn.Module):
         x = F.dropout(F.elu(out), p=0.5)
 
         actor_logits = self.actor(x)
-        actor_logits[1 - act_mask] = -999999.0
+        actor_logits[~act_mask] = -999999.0 
         act_probs = F.softmax(actor_logits, dim=-1)  # Tensor of [bs, act_dim]
 
         state_values = self.critic(x)  # Tensor of [bs, 1]
@@ -52,14 +52,14 @@ class ActorCritic(nn.Module):
 
     def select_action(self, batch_state, batch_act_mask, device):
         state = torch.FloatTensor(batch_state).to(device)  # Tensor [bs, state_dim]
-        act_mask = torch.ByteTensor(batch_act_mask).to(device)  # Tensor of [bs, act_dim]
+        act_mask = torch.BoolTensor(batch_act_mask).to(device)  # Tensor of [bs, act_dim]
 
         probs, value = self((state, act_mask))  # act_probs: [bs, act_dim], state_value: [bs, 1]
         m = Categorical(probs)
         acts = m.sample()  # Tensor of [bs, ], requires_grad=False
         # [CAVEAT] If sampled action is out of action_space, choose the first action in action_space.
-        valid_idx = act_mask.gather(1, acts.view(-1, 1)).view(-1)
-        acts[valid_idx == 0] = 0
+        valid_idx = act_mask.gather(1, acts.view(-1, 1)).view(-1).bool()
+        acts[~valid_idx] = 0
 
         self.saved_actions.append(SavedAction(m.log_prob(acts), value))
         self.entropy.append(m.entropy())
@@ -195,16 +195,16 @@ def main():
     parser.add_argument('--name', type=str, default='train_agent', help='directory name.')
     parser.add_argument('--seed', type=int, default=123, help='random seed.')
     parser.add_argument('--gpu', type=str, default='0', help='gpu device.')
-    parser.add_argument('--epochs', type=int, default=50, help='Max number of epochs.')
-    parser.add_argument('--batch_size', type=int, default=32, help='batch size.')
+    parser.add_argument('--epochs', type=int, default=1, help='Max number of epochs.') # default=50
+    parser.add_argument('--batch_size', type=int, default=16, help='batch size.') # default=32
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate.')
-    parser.add_argument('--max_acts', type=int, default=250, help='Max number of actions.')
-    parser.add_argument('--max_path_len', type=int, default=3, help='Max path length.')
+    parser.add_argument('--max_acts', type=int, default=50, help='Max number of actions.') # default=250
+    parser.add_argument('--max_path_len', type=int, default=1, help='Max path length.') # default=3
     parser.add_argument('--gamma', type=float, default=0.99, help='reward discount factor.')
     parser.add_argument('--ent_weight', type=float, default=1e-3, help='weight factor for entropy loss')
     parser.add_argument('--act_dropout', type=float, default=0.5, help='action dropout rate.')
     parser.add_argument('--state_history', type=int, default=1, help='state history length')
-    parser.add_argument('--hidden', type=int, nargs='*', default=[512, 256], help='number of samples')
+    parser.add_argument('--hidden', type=int, nargs='*', default=[32, 16], help='number of samples') # default=[512, 256]
     args = parser.parse_args()
 
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu

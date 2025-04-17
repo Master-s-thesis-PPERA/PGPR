@@ -72,8 +72,8 @@ def batch_beam_search(env, model, uids, device, topk=[25, 5, 1]):
         batch_masks = []
         for acts in batch_acts:
             num_acts = len(acts)
-            act_mask = np.zeros(model.act_dim, dtype=np.uint8)
-            act_mask[:num_acts] = 1
+            act_mask = np.zeros(model.act_dim, dtype=bool) 
+            act_mask[:num_acts] = True
             batch_masks.append(act_mask)
         return np.vstack(batch_masks)
 
@@ -85,7 +85,7 @@ def batch_beam_search(env, model, uids, device, topk=[25, 5, 1]):
         state_tensor = torch.FloatTensor(state_pool).to(device)
         acts_pool = env._batch_get_actions(path_pool, False)  # list of list, size=bs
         actmask_pool = _batch_acts_to_masks(acts_pool)  # numpy of [bs, dim]
-        actmask_tensor = torch.ByteTensor(actmask_pool).to(device)
+        actmask_tensor = torch.BoolTensor(actmask_pool).to(device)
         probs, _ = model((state_tensor, actmask_tensor))  # Tensor of [bs, act_dim]
         probs = probs + actmask_tensor.float()  # In order to differ from masked actions
         topk_probs, topk_idxs = torch.topk(probs, topk[hop], dim=1)  # LongTensor of [bs, k]
@@ -127,7 +127,7 @@ def predict_paths(policy_file, path_file, args):
     test_labels = load_labels(args.dataset, 'test')
     test_uids = list(test_labels.keys())
 
-    batch_size = 16
+    batch_size = 8 # default = 16
     start_idx = 0
     all_paths, all_probs = [], []
     pbar = tqdm(total=len(test_uids))
@@ -223,14 +223,14 @@ if __name__ == '__main__':
     parser.add_argument('--name', type=str, default='train_agent', help='directory name.')
     parser.add_argument('--seed', type=int, default=123, help='random seed.')
     parser.add_argument('--gpu', type=str, default='0', help='gpu device.')
-    parser.add_argument('--epochs', type=int, default=50, help='num of epochs.')
-    parser.add_argument('--max_acts', type=int, default=250, help='Max number of actions.')
+    parser.add_argument('--epochs', type=int, default=1, help='num of epochs.') # default=50
+    parser.add_argument('--max_acts', type=int, default=50, help='Max number of actions.') # default=250
     parser.add_argument('--max_path_len', type=int, default=3, help='Max path length.')
     parser.add_argument('--gamma', type=float, default=0.99, help='reward discount factor.')
     parser.add_argument('--state_history', type=int, default=1, help='state history length')
-    parser.add_argument('--hidden', type=int, nargs='*', default=[512, 256], help='number of samples')
+    parser.add_argument('--hidden', type=int, nargs='*', default=[32, 16], help='number of samples') # default=[512, 256]
     parser.add_argument('--add_products', type=boolean, default=False, help='Add predicted products up to 10')
-    parser.add_argument('--topk', type=int, nargs='*', default=[25, 5, 1], help='number of samples')
+    parser.add_argument('--topk', type=int, nargs='*', default=[5, 2, 1], help='number of samples') # default=[25, 5, 1]
     parser.add_argument('--run_path', type=boolean, default=True, help='Generate predicted path? (takes long time)')
     parser.add_argument('--run_eval', type=boolean, default=True, help='Run evaluation?')
     args = parser.parse_args()
