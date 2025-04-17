@@ -5,9 +5,20 @@ This repository contains the source code of the SIGIR 2019 paper "[Reinforcement
 Two Amazon datasets (Amazon_Beauty, Amazon_Cellphones) are available in the "data/" directory and the split is consistent with [1].
 All four datasets used in this paper can be downloaded [here](https://drive.google.com/uc?export=download&confirm=Tiux&id=1CL4Pjumj9d7fUDQb1_leIMOot73kVxKB).
 
-## Requirements
-- Python >= 3.6
-- PyTorch = 1.0
+## How to run
+```bash
+conda create -n <environment_name> python=3.9
+conda activate <environment_name>
+```
+##Install dependencies
+```bash
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install scipy
+pip3 install -U scikit-learn
+pip install easydict
+pip install tqdm
+pip install matplotlib
+```
 
 
 ## How to run the code
