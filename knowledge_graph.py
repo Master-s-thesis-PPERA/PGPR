@@ -74,7 +74,7 @@ class KnowledgeGraph(object):
             f.writelines([' '.join(words) + '\n' for words in all_removed_words])
 
     def _load_knowledge(self, dataset):
-        for relation in [PRODUCED_BY, BELONG_TO, ALSO_BOUGHT, ALSO_VIEWED, BOUGHT_TOGETHER]:
+        for relation in [BELONG_TO]: # [PRODUCED_BY, BELONG_TO, ALSO_BOUGHT, ALSO_VIEWED, BOUGHT_TOGETHER]
             print('Load knowledge {}...'.format(relation))
             data = getattr(dataset, relation).data
             num_edges = 0

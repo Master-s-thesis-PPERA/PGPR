@@ -36,10 +36,10 @@ class AmazonDataset(object):
         entity_files = edict(
                 user='users.txt.gz',
                 product='product.txt.gz',
-                word='vocab.txt.gz',
-                related_product='related_product.txt.gz',
-                brand='brand.txt.gz',
-                category='category.txt.gz',
+                word='vocab.txt.gz', # tag
+                # related_product='related_product.txt.gz',
+                # brand='brand.txt.gz',
+                category='category.txt.gz', #genre
         )
         for name in entity_files:
             vocab = self._load_file(entity_files[name])
@@ -95,11 +95,11 @@ class AmazonDataset(object):
         - `et_distrib`: frequency of entity_tail vocab.
         """
         product_relations = edict(
-                produced_by=('brand_p_b.txt.gz', self.brand),  # (filename, entity_tail)
+                # produced_by=('brand_p_b.txt.gz', self.brand),  # (filename, entity_tail)
                 belongs_to=('category_p_c.txt.gz', self.category),
-                also_bought=('also_bought_p_p.txt.gz', self.related_product),
-                also_viewed=('also_viewed_p_p.txt.gz', self.related_product),
-                bought_together=('bought_together_p_p.txt.gz', self.related_product),
+                # also_bought=('also_bought_p_p.txt.gz', self.related_product),
+                # also_viewed=('also_viewed_p_p.txt.gz', self.related_product),
+                # bought_together=('bought_together_p_p.txt.gz', self.related_product),
         )
         for name in product_relations:
             # We save information of entity_tail (et) in each relation.
