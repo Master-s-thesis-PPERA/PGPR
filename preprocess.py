@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
+# from recommenders.datasets.python_splitters import python_stratified_split
+
 import os
 import pickle
 import argparse
@@ -421,8 +423,16 @@ def main():
             data_df,
             test_size=args.test_split,
             random_state=args.seed,
-            # stratify=data_df['userID'] # Uncomment cautiously
+            stratify=data_df['userID'] # Uncomment cautiously
         )
+        
+# ------------------------------------------------------------------------------------------------------------------------------------------
+        # When merge with PPERA, uncoment this to everywhere be the same split (of course, have to adapt the code)
+        # train, test = python_stratified_split(
+        #     data_df, ratio=ratio, col_user=header["col_user"], col_item=header["col_item"], seed=seed
+        #     )
+
+
     except Exception as e:
          print(f"Stratified split failed ({e}), using simple random split.")
          train_df, test_df = train_test_split(
