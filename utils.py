@@ -12,100 +12,75 @@ import torch
 
 
 # Dataset names.
-BEAUTY = 'beauty'
-CELL = 'cell'
-CLOTH = 'cloth'
-CD = 'cd'
+MOVIELENS = 'movielens'
+AMAZONSALES = 'amazonsales'
+POSTRECOMMENDATIONS = 'PostRecommendations'
 
 # Dataset directories.
 DATASET_DIR = {
-    BEAUTY: './data/Amazon_Beauty',
-    CELL: './data/Amazon_Cellphones',
-    CLOTH: './data/Amazon_Clothing',
-    CD: './data/Amazon_CDs',
+    MOVIELENS: './datasets/movielens',
+    AMAZONSALES: './datasets/amazonsales',
+    POSTRECOMMENDATIONS: './datasets/PostRecommendations',
 }
 
 # Model result directories.
 TMP_DIR = {
-    BEAUTY: './tmp/Amazon_Beauty',
-    CELL: './tmp/Amazon_Cellphones',
-    CLOTH: './tmp/Amazon_Clothing',
-    CD: './tmp/Amazon_CDs',
+    MOVIELENS: './tmp/Movielens',
+    AMAZONSALES: './tmp/AmazonSales',
+    POSTRECOMMENDATIONS: './tmp/PostRecommendations',
 }
 
 # Label files.
 LABELS = {
-    BEAUTY: (TMP_DIR[BEAUTY] + '/train_label.pkl', TMP_DIR[BEAUTY] + '/test_label.pkl'),
-    CLOTH: (TMP_DIR[CLOTH] + '/train_label.pkl', TMP_DIR[CLOTH] + '/test_label.pkl'),
-    CELL: (TMP_DIR[CELL] + '/train_label.pkl', TMP_DIR[CELL] + '/test_label.pkl'),
-    CD: (TMP_DIR[CD] + '/train_label.pkl', TMP_DIR[CD] + '/test_label.pkl')
+    MOVIELENS: (TMP_DIR[MOVIELENS] + '/train_label.pkl', TMP_DIR[MOVIELENS] + '/test_label.pkl'),
+    AMAZONSALES: (TMP_DIR[AMAZONSALES] + '/train_label.pkl', TMP_DIR[AMAZONSALES] + '/test_label.pkl'),
+    POSTRECOMMENDATIONS: (TMP_DIR[POSTRECOMMENDATIONS] + '/train_label.pkl', TMP_DIR[POSTRECOMMENDATIONS] + '/test_label.pkl'),
 }
 
 
 # Entities
-USER = 'user'
-PRODUCT = 'product'
-WORD = 'word'
-RPRODUCT = 'related_product'
-BRAND = 'brand'
-CATEGORY = 'category'
+USERID = 'user_id'
+ITEMID = 'item_id'
+TITLE = 'title'
+GENRES = 'genres'
+RATING = 'rating'
 
 
 # Relations
 PURCHASE = 'purchase'
 MENTION = 'mentions'
 DESCRIBED_AS = 'described_as'
-PRODUCED_BY = 'produced_by'
 BELONG_TO = 'belongs_to'
-ALSO_BOUGHT = 'also_bought'
-ALSO_VIEWED = 'also_viewed'
-BOUGHT_TOGETHER = 'bought_together'
 SELF_LOOP = 'self_loop'  # only for kg env
 
 KG_RELATION = {
-    USER: {
-        PURCHASE: PRODUCT,
-        MENTION: WORD,
+    USERID: {
+        PURCHASE: ITEMID,
+        MENTION: TITLE,
     },
-    WORD: {
-        MENTION: USER,
-        DESCRIBED_AS: PRODUCT,
+    TITLE: {
+        MENTION: USERID,
+        DESCRIBED_AS: ITEMID,
     },
-    PRODUCT: {
-        PURCHASE: USER,
-        DESCRIBED_AS: WORD,
-        PRODUCED_BY: BRAND,
-        BELONG_TO: CATEGORY,
-        ALSO_BOUGHT: RPRODUCT,
-        ALSO_VIEWED: RPRODUCT,
-        BOUGHT_TOGETHER: RPRODUCT,
+    ITEMID: {
+        PURCHASE: USERID,
+        DESCRIBED_AS: TITLE,
+        BELONG_TO: GENRES,
     },
-    BRAND: {
-        PRODUCED_BY: PRODUCT,
-    },
-    CATEGORY: {
-        BELONG_TO: PRODUCT,
-    },
-    RPRODUCT: {
-        ALSO_BOUGHT: PRODUCT,
-        ALSO_VIEWED: PRODUCT,
-        BOUGHT_TOGETHER: PRODUCT,
+    GENRES: {
+        BELONG_TO: ITEMID,
     }
 }
 
 
 PATH_PATTERN = {
     # length = 3
-    1: ((None, USER), (MENTION, WORD), (DESCRIBED_AS, PRODUCT)),
+    1: ((None, USERID), (MENTION, TITLE), (DESCRIBED_AS, ITEMID)),
     # length = 4
-    11: ((None, USER), (PURCHASE, PRODUCT), (PURCHASE, USER), (PURCHASE, PRODUCT)),
-    12: ((None, USER), (PURCHASE, PRODUCT), (DESCRIBED_AS, WORD), (DESCRIBED_AS, PRODUCT)),
-    13: ((None, USER), (PURCHASE, PRODUCT), (PRODUCED_BY, BRAND), (PRODUCED_BY, PRODUCT)),
-    14: ((None, USER), (PURCHASE, PRODUCT), (BELONG_TO, CATEGORY), (BELONG_TO, PRODUCT)),
-    15: ((None, USER), (PURCHASE, PRODUCT), (ALSO_BOUGHT, RPRODUCT), (ALSO_BOUGHT, PRODUCT)),
-    16: ((None, USER), (PURCHASE, PRODUCT), (ALSO_VIEWED, RPRODUCT), (ALSO_VIEWED, PRODUCT)),
-    17: ((None, USER), (PURCHASE, PRODUCT), (BOUGHT_TOGETHER, RPRODUCT), (BOUGHT_TOGETHER, PRODUCT)),
-    18: ((None, USER), (MENTION, WORD), (MENTION, USER), (PURCHASE, PRODUCT)),
+    11: ((None, USERID), (PURCHASE, ITEMID), (PURCHASE, USERID), (PURCHASE, ITEMID)),
+    12: ((None, USERID), (PURCHASE, ITEMID), (DESCRIBED_AS, TITLE), (DESCRIBED_AS, ITEMID)),
+    13: ((None, USERID), (PURCHASE, ITEMID), (BELONG_TO, GENRES), (BELONG_TO, ITEMID)),
+    14: ((None, USERID), (MENTION, TITLE), (MENTION, USERID), (PURCHASE, ITEMID)),
 }
 
 

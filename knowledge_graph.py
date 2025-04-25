@@ -62,11 +62,11 @@ class KnowledgeGraph(object):
                 continue
 
             # (2) Add edges.
-            self._add_edge(USER, uid, PURCHASE, PRODUCT, pid)
+            self._add_edge(USERID, uid, PURCHASE, ITEMID, pid)
             num_edges += 2
             for wid in remained_words:
-                self._add_edge(USER, uid, MENTION, WORD, wid)
-                self._add_edge(PRODUCT, pid, DESCRIBED_AS, WORD, wid)
+                self._add_edge(USERID, uid, MENTION, TITLE, wid)
+                self._add_edge(ITEMID, pid, DESCRIBED_AS, TITLE, wid)
                 num_edges += 4
         print('Total {:d} review edges.'.format(num_edges))
 
@@ -74,7 +74,7 @@ class KnowledgeGraph(object):
             f.writelines([' '.join(words) + '\n' for words in all_removed_words])
 
     def _load_knowledge(self, dataset):
-        for relation in [PRODUCED_BY, BELONG_TO, ALSO_BOUGHT, ALSO_VIEWED, BOUGHT_TOGETHER]:
+        for relation in [BELONG_TO]:
             print('Load knowledge {}...'.format(relation))
             data = getattr(dataset, relation).data
             num_edges = 0
@@ -82,8 +82,8 @@ class KnowledgeGraph(object):
                 if len(eids) <= 0:
                     continue
                 for eid in set(eids):
-                    et_type = get_entity_tail(PRODUCT, relation)
-                    self._add_edge(PRODUCT, pid, relation, et_type, eid)
+                    et_type = get_entity_tail(ITEMID, relation)
+                    self._add_edge(ITEMID, pid, relation, et_type, eid)
                     num_edges += 2
             print('Total {:d} {:s} edges.'.format(num_edges, relation))
 
@@ -163,9 +163,9 @@ class KnowledgeGraph(object):
 
     def set_top_matches(self, u_u_match, u_p_match, u_w_match):
         self.top_matches = {
-            USER: u_u_match,
-            PRODUCT: u_p_match,
-            WORD: u_w_match,
+            USERID: u_u_match,
+            ITEMID: u_p_match,
+            TITLE: u_w_match,
         }
 
     def heuristic_search(self, uid, pid, pattern_id, trim_edges=False):
@@ -179,28 +179,28 @@ class KnowledgeGraph(object):
         pattern = PATH_PATTERN[pattern_id]
         paths = []
         if pattern_id == 1:  # OK
-            wids_u = set(_get(USER, uid, MENTION))  # USER->MENTION->WORD
-            wids_p = set(_get(PRODUCT, pid, DESCRIBED_AS))  # PRODUCT->DESCRIBE->WORD
+            wids_u = set(_get(USERID, uid, MENTION))  # USER->MENTION->WORD
+            wids_p = set(_get(ITEMID, pid, DESCRIBED_AS))  # PRODUCT->DESCRIBE->WORD
             intersect_nodes = wids_u.intersection(wids_p)
             paths = [(uid, x, pid) for x in intersect_nodes]
         elif pattern_id in [11, 12, 13, 14, 15, 16, 17]:
-            pids_u = set(_get(USER, uid, PURCHASE))  # USER->PURCHASE->PRODUCT
+            pids_u = set(_get(USERID, uid, PURCHASE))  # USER->PURCHASE->PRODUCT
             pids_u = pids_u.difference([pid])  # exclude target product
-            nodes_p = set(_get(PRODUCT, pid, pattern[3][0]))  # PRODUCT->relation->node2
-            if pattern[2][1] == USER:
+            nodes_p = set(_get(ITEMID, pid, pattern[3][0]))  # PRODUCT->relation->node2
+            if pattern[2][1] == USERID:
                 nodes_p.difference([uid])
             for pid_u in pids_u:
                 relation, entity_tail = pattern[2][0], pattern[2][1]
-                et_ids = set(_get(PRODUCT, pid_u, relation))  # USER->PURCHASE->PRODUCT->relation->node2
+                et_ids = set(_get(ITEMID, pid_u, relation))  # USER->PURCHASE->PRODUCT->relation->node2
                 intersect_nodes = et_ids.intersection(nodes_p)
                 tmp_paths = [(uid, pid_u, x, pid) for x in intersect_nodes]
                 paths.extend(tmp_paths)
         elif pattern_id == 18:
-            wids_u = set(_get(USER, uid, MENTION))  # USER->MENTION->WORD
-            uids_p = set(_get(PRODUCT, pid, PURCHASE))  # PRODUCT->PURCHASE->USER
+            wids_u = set(_get(USERID, uid, MENTION))  # USER->MENTION->WORD
+            uids_p = set(_get(ITEMID, pid, PURCHASE))  # PRODUCT->PURCHASE->USER
             uids_p = uids_p.difference([uid])  # exclude source user
             for uid_p in uids_p:
-                wids_u_p = set(_get(USER, uid_p, MENTION))  # PRODUCT->PURCHASE->USER->MENTION->WORD
+                wids_u_p = set(_get(USERID, uid_p, MENTION))  # PRODUCT->PURCHASE->USER->MENTION->WORD
                 intersect_nodes = wids_u.intersection(wids_u_p)
                 tmp_paths = [(uid, x, uid_p, pid) for x in intersect_nodes]
                 paths.extend(tmp_paths)

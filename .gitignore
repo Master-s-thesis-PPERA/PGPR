@@ -7,6 +7,8 @@ tmp/
 *.pkl
 tags
 sklearn-env/
+*.csv
+*txt.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

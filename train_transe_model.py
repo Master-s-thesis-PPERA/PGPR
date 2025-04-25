@@ -110,7 +110,7 @@ def extract_embeddings(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default=BEAUTY, help='One of {beauty, cd, cell, clothing}.')
+    parser.add_argument('--dataset', type=str, default=MOVIELENS, help='One of {movielens, amazonsales, postrecommendation}.')
     parser.add_argument('--name', type=str, default='train_transe_model', help='model name.')
     parser.add_argument('--seed', type=int, default=123, help='random seed.')
     parser.add_argument('--gpu', type=str, default='1', help='gpu device.')
