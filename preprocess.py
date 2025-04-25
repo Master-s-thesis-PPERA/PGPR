@@ -286,6 +286,69 @@ def create_processed_dataset(df: pd.DataFrame) -> dict:
         processed_data['relations'][MENTION] = list(mention_relations)
         print(f"    Relation '{MENTION}': {len(processed_data['relations'][MENTION])} unique user-title links (derived).")
 
+
+    # --- Calculate Tail Entity Distributions for Negative Sampling ---
+    print("  Calculating tail entity distributions for negative sampling...")
+    processed_data['distributions'] = {}
+
+    for relation_name, relation_data in processed_data.get('relations', {}).items():
+        print(f"    Calculating distribution for: {relation_name}")
+        try:
+            # Determine the tail entity type for this relation
+            head_entity_type = None # Find the head type first
+            for h_type, rels in KG_RELATION.items():
+                if relation_name in rels:
+                    head_entity_type = h_type
+                    break
+            if head_entity_type is None:
+                print(f"      Warning: Could not find head entity for relation '{relation_name}'. Skipping distribution calculation.")
+                continue
+
+            tail_entity_type = get_entity_tail(head_entity_type, relation_name)
+            tail_map_data = processed_data.get('entity_maps', {}).get(tail_entity_type, {})
+            tail_vocab_size = tail_map_data.get('vocab_size', 0)
+
+            if tail_vocab_size == 0:
+                 print(f"      Warning: Tail vocab size is 0 for relation '{relation_name}'. Skipping distribution calculation.")
+                 continue
+
+            # Count frequencies of tail entities
+            tail_counts = np.zeros(tail_vocab_size, dtype=np.float64)
+            num_valid_triples = 0
+            for _, tail_idx in relation_data: # We only need the tail index here
+                 if 0 <= tail_idx < tail_vocab_size: # Check index validity
+                     tail_counts[tail_idx] += 1
+                     num_valid_triples += 1
+                 # else: # Optional logging for invalid indices
+                 #     print(f"      Debug: Invalid tail index {tail_idx} encountered for relation {relation_name}")
+
+            if num_valid_triples == 0:
+                 print(f"      Warning: No valid triples found for relation '{relation_name}'. Setting uniform distribution.")
+                 # Fallback to uniform distribution if no data or all indices were invalid
+                 distrib = np.ones(tail_vocab_size, dtype=np.float64)
+            else:
+                 print(f"      Counted {int(np.sum(tail_counts))} occurrences across {num_valid_triples} valid triples.")
+                 # Apply smoothing (power 0.75) - standard practice
+                 distrib = np.power(tail_counts, 0.75)
+
+            # Normalize to get a probability distribution
+            sum_distrib = np.sum(distrib)
+            if sum_distrib > 0:
+                normalized_distrib = distrib / sum_distrib
+            else:
+                 # Handle case where all counts were zero after smoothing (or initially)
+                 print(f"      Warning: Sum of distribution is zero for '{relation_name}'. Using uniform.")
+                 normalized_distrib = np.ones(tail_vocab_size, dtype=np.float64) / tail_vocab_size
+
+            # Store the final distribution (as numpy array)
+            processed_data['distributions'][relation_name] = normalized_distrib
+            print(f"      Stored distribution for '{relation_name}' with {len(normalized_distrib)} elements.")
+
+        except KeyError as e:
+             print(f"    Error processing distribution for '{relation_name}': Missing key {e}")
+        except Exception as e:
+             print(f"    Unexpected error calculating distribution for '{relation_name}': {e}")
+
     print("Finished processing DataFrame.")
     return processed_data
 
@@ -376,7 +439,7 @@ def main():
 
 
     # --- 2. Create and Cache Processed Dataset Object ---
-    processed_dataset_file = TMP_DIR[args.dataset] + '/dataset.pkl'
+    processed_dataset_file = TMP_DIR[args.dataset] + '/processed_dataset.pkl'
     processed_dataset = None # Initialize
     if not args.force_reprocess and os.path.exists(processed_dataset_file):
         print(f"Loading cached processed dataset from {processed_dataset_file}...")
@@ -423,7 +486,7 @@ def main():
             data_df,
             test_size=args.test_split,
             random_state=args.seed,
-            stratify=data_df['userID'] # Uncomment cautiously
+            #stratify=data_df['userID'] # Uncomment cautiously
         )
         
 # ------------------------------------------------------------------------------------------------------------------------------------------
