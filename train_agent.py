@@ -130,7 +130,7 @@ class ACDataLoader(object):
 
 def train(args):
     env = BatchKGEnvironment(args.dataset, args.max_acts, max_path_len=args.max_path_len, state_history=args.state_history)
-    uids = list(env.kg(USER).keys())
+    uids = list(env.kg(USERID).keys())
     dataloader = ACDataLoader(uids, args.batch_size)
     model = ActorCritic(env.state_dim, env.act_dim, gamma=args.gamma, hidden_sizes=args.hidden).to(args.device)
     logger.info('Parameters:' + str([i[0] for i in model.named_parameters()]))
@@ -191,7 +191,9 @@ def train(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default=BEAUTY, help='One of {clothing, cell, beauty, cd}')
+    # Updated default dataset and help string
+    parser.add_argument('--dataset', type=str, default=MOVIELENS,
+                        help=f'One of {{{MOVIELENS}, {AMAZONSALES}, {POSTRECOMMENDATIONS}}}.')
     parser.add_argument('--name', type=str, default='train_agent', help='directory name.')
     parser.add_argument('--seed', type=int, default=123, help='random seed.')
     parser.add_argument('--gpu', type=str, default='0', help='gpu device.')
