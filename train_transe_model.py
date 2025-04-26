@@ -198,7 +198,7 @@ def extract_embeddings(args):
     relation_param_names = {
         PURCHASE: ('purchase', 'purchase_bias.weight'), # Example: (relation_vector_name, bias_layer_name)
         MENTION: ('mentions', 'mentions_bias.weight'),
-        DESCRIBED_AS: ('describe_as', 'describe_as_bias.weight'),
+        DESCRIBED_AS: ('described_as', 'described_as_bias.weight'),
         BELONG_TO: ('belongs_to', 'belongs_to_bias.weight'),
     }
 
