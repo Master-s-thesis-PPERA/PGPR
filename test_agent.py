@@ -145,16 +145,16 @@ def predict_paths(policy_file, path_file, args):
 
 def evaluate_paths(path_file, train_labels, test_labels):
     embeds = load_embed(args.dataset)
-    user_embeds = embeds[USER]
+    user_embeds = embeds[USERID]
     purchase_embeds = embeds[PURCHASE][0]
-    product_embeds = embeds[PRODUCT]
+    product_embeds = embeds[ITEMID]
     scores = np.dot(user_embeds + purchase_embeds, product_embeds.T)
 
     # 1) Get all valid paths for each user, compute path score and path probability.
     results = pickle.load(open(path_file, 'rb'))
     pred_paths = {uid: {} for uid in test_labels}
     for path, probs in zip(results['paths'], results['probs']):
-        if path[-1][1] != PRODUCT:
+        if path[-1][1] != ITEMID:
             continue
         uid = path[0][2]
         if uid not in pred_paths:
@@ -169,7 +169,8 @@ def evaluate_paths(path_file, train_labels, test_labels):
     # 2) Pick best path for each user-product pair, also remove pid if it is in train set.
     best_pred_paths = {}
     for uid in pred_paths:
-        train_pids = set(train_labels[uid])
+        # train_pids = set(train_labels[uid])
+        train_pids = set(train_labels.get(uid, [])) # only for test
         best_pred_paths[uid] = []
         for pid in pred_paths[uid]:
             if pid in train_pids:
@@ -219,7 +220,8 @@ def test(args):
 if __name__ == '__main__':
     boolean = lambda x: (str(x).lower() == 'true')
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default=BEAUTY, help='One of {cloth, beauty, cell, cd}')
+    parser.add_argument('--dataset', type=str, default=MOVIELENS,
+                        help=f'One of {{{MOVIELENS}, {AMAZONSALES}, {POSTRECOMMENDATIONS}}}.')
     parser.add_argument('--name', type=str, default='train_agent', help='directory name.')
     parser.add_argument('--seed', type=int, default=123, help='random seed.')
     parser.add_argument('--gpu', type=str, default='0', help='gpu device.')
