@@ -197,16 +197,16 @@ def main():
     parser.add_argument('--name', type=str, default='train_agent', help='directory name.')
     parser.add_argument('--seed', type=int, default=123, help='random seed.')
     parser.add_argument('--gpu', type=str, default='0', help='gpu device.')
-    parser.add_argument('--epochs', type=int, default=1, help='Max number of epochs.') # default=50
-    parser.add_argument('--batch_size', type=int, default=16, help='batch size.') # default=32
+    parser.add_argument('--epochs', type=int, default=50, help='Max number of epochs.') # default=50 fast_test=1
+    parser.add_argument('--batch_size', type=int, default=32, help='batch size.') # default=32 fast_test=16
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate.')
-    parser.add_argument('--max_acts', type=int, default=50, help='Max number of actions.') # default=250
-    parser.add_argument('--max_path_len', type=int, default=1, help='Max path length.') # default=3
+    parser.add_argument('--max_acts', type=int, default=250, help='Max number of actions.') # default=250 fast_test=50
+    parser.add_argument('--max_path_len', type=int, default=3, help='Max path length.') # default=3 fast_test=1
     parser.add_argument('--gamma', type=float, default=0.99, help='reward discount factor.')
     parser.add_argument('--ent_weight', type=float, default=1e-3, help='weight factor for entropy loss')
     parser.add_argument('--act_dropout', type=float, default=0.5, help='action dropout rate.')
     parser.add_argument('--state_history', type=int, default=1, help='state history length')
-    parser.add_argument('--hidden', type=int, nargs='*', default=[32, 16], help='number of samples') # default=[512, 256]
+    parser.add_argument('--hidden', type=int, nargs='*', default=[512, 256], help='number of samples') # default=[512, 256] fast_test=[32, 16]
     args = parser.parse_args()
 
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu

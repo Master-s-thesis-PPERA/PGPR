@@ -254,14 +254,14 @@ def main():
     parser.add_argument('--name', type=str, default='train_transe_model', help='model name.')
     parser.add_argument('--seed', type=int, default=123, help='random seed.')
     parser.add_argument('--gpu', type=str, default='1', help='gpu device.')
-    parser.add_argument('--epochs', type=int, default=1, help='number of epochs to train.') #default=30
+    parser.add_argument('--epochs', type=int, default=30, help='number of epochs to train.') #default=30 fast_test=1
     parser.add_argument('--batch_size', type=int, default=64, help='batch size.')
     parser.add_argument('--lr', type=float, default=0.5, help='learning rate.')
     parser.add_argument('--weight_decay', type=float, default=0, help='weight decay for adam.')
     parser.add_argument('--l2_lambda', type=float, default=0, help='l2 lambda')
     parser.add_argument('--max_grad_norm', type=float, default=5.0, help='Clipping gradient.')
-    parser.add_argument('--embed_size', type=int, default=10, help='knowledge embedding size.') #default=100
-    parser.add_argument('--num_neg_samples', type=int, default=1, help='number of negative samples.') #default=5
+    parser.add_argument('--embed_size', type=int, default=100, help='knowledge embedding size.') #default=100 fast_test=10
+    parser.add_argument('--num_neg_samples', type=int, default=5, help='number of negative samples.') #default=5 fast_test=1
     parser.add_argument('--steps_per_checkpoint', type=int, default=200, help='Number of steps for checkpoint.')
     args = parser.parse_args()
 

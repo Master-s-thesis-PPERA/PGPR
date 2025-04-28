@@ -225,14 +225,14 @@ if __name__ == '__main__':
     parser.add_argument('--name', type=str, default='train_agent', help='directory name.')
     parser.add_argument('--seed', type=int, default=123, help='random seed.')
     parser.add_argument('--gpu', type=str, default='0', help='gpu device.')
-    parser.add_argument('--epochs', type=int, default=1, help='num of epochs.') # default=50
-    parser.add_argument('--max_acts', type=int, default=50, help='Max number of actions.') # default=250
+    parser.add_argument('--epochs', type=int, default=50, help='num of epochs.') # default=50 fast_test=1
+    parser.add_argument('--max_acts', type=int, default=250, help='Max number of actions.') # default=250 fast_test=50
     parser.add_argument('--max_path_len', type=int, default=3, help='Max path length.')
     parser.add_argument('--gamma', type=float, default=0.99, help='reward discount factor.')
     parser.add_argument('--state_history', type=int, default=1, help='state history length')
-    parser.add_argument('--hidden', type=int, nargs='*', default=[32, 16], help='number of samples') # default=[512, 256]
+    parser.add_argument('--hidden', type=int, nargs='*', default=[512, 256], help='number of samples') # default=[512, 256] fast_test=[32, 16]
     parser.add_argument('--add_products', type=boolean, default=False, help='Add predicted products up to 10')
-    parser.add_argument('--topk', type=int, nargs='*', default=[5, 2, 1], help='number of samples') # default=[25, 5, 1]
+    parser.add_argument('--topk', type=int, nargs='*', default=[25, 5, 1], help='number of samples') # default=[25, 5, 1] fast_test=[5, 2, 1]
     parser.add_argument('--run_path', type=boolean, default=True, help='Generate predicted path? (takes long time)')
     parser.add_argument('--run_eval', type=boolean, default=True, help='Run evaluation?')
     args = parser.parse_args()
