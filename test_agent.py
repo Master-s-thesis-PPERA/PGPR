@@ -169,8 +169,8 @@ def evaluate_paths(path_file, train_labels, test_labels):
     # 2) Pick best path for each user-product pair, also remove pid if it is in train set.
     best_pred_paths = {}
     for uid in pred_paths:
-        # train_pids = set(train_labels[uid])
-        train_pids = set(train_labels.get(uid, [])) # only for test
+        train_pids = set(train_labels[uid])
+        # train_pids = set(train_labels.get(uid, [])) # only for test
         best_pred_paths[uid] = []
         for pid in pred_paths[uid]:
             if pid in train_pids:

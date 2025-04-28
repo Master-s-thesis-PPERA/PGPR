@@ -10,6 +10,7 @@ from collections import defaultdict
 # Removed EasyDict import - we will use standard dicts
 # from easydict import EasyDict as edict
 from sklearn.model_selection import train_test_split
+from recommenders.datasets.python_splitters import python_stratified_split
 
 # Import your custom loader and the modified utils
 from datasets_loader import loader as load_dataframe # Renamed to avoid conflict
@@ -401,6 +402,7 @@ def main():
     parser.add_argument('--num_rows', type=int, default=None, help='Number of rows to load (optional).')
     parser.add_argument('--seed', type=int, default=42, help='Random seed for sampling and splitting.')
     parser.add_argument('--test_split', type=float, default=0.2, help='Fraction of data for the test set.')
+    parser.add_argument('--ratio', type=float, default=0.75, help='Fraction of data for the test set.')
     # Add flag to force reprocessing even if cached files exist
     parser.add_argument('--force_reprocess', action='store_true', help='Force reprocessing even if cached files exist.')
 
@@ -481,22 +483,17 @@ def main():
     print("Splitting data into train/test sets...")
     # Simple random split for now, consider time-based split if 'timestamp' is reliable
     try:
-        # Use stratify if possible to maintain user distribution (might be slow)
-        train_df, test_df = train_test_split(
+        train_df, test_df = python_stratified_split(
             data_df,
-            test_size=args.test_split,
-            random_state=args.seed,
-            #stratify=data_df['userID'] # Uncomment cautiously
+            ratio=args.ratio,      # Corresponds to train set size (e.g., 0.75 for 75% train)
+            col_user='userID',     # Pass the string name 'userID'
+            col_item='itemID',     # Pass the string name 'itemID'
+            seed=args.seed
         )
-        
-# ------------------------------------------------------------------------------------------------------------------------------------------
-        # When merge with PPERA, uncoment this to everywhere be the same split (of course, have to adapt the code)
-        # train, test = python_stratified_split(
-        #     data_df, ratio=ratio, col_user=header["col_user"], col_item=header["col_item"], seed=seed
-        #     )
-
+        print("Stratified split successful.")
 
     except Exception as e:
+         print('####################################################################################################################')
          print(f"Stratified split failed ({e}), using simple random split.")
          train_df, test_df = train_test_split(
             data_df,
